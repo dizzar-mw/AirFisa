@@ -1,0 +1,6 @@
+{
+  "name": "Airfisa",
+  "description": "A remote monitoring and control application with Dashboard and Agent modes, featuring real-time camera, voice, and screen access.",
+  "requestFramePermissions": ["camera", "microphone", "display-capture"],
+  "majorCapabilities": []
+}

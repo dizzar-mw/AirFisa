@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: devices
+    // Document ID: {deviceId}
+    // Fields:
+    //   - id: string (required)
+    //   - name: string (optional)
+    //   - role: string (required, 'dashboard' | 'agent')
+    //   - status: string (required, 'online' | 'offline')
+    //   - lastSeen: timestamp (optional)
+    //   - ownerEmail: string (required)
+    //
+    // Collection: signals (subcollection of devices)
+    // Document ID: {signalId}
+    // Fields:
+    //   - from: string (required)
+    //   - to: string (required)
+    //   - type: string (required, 'offer' | 'answer' | 'candidate')
+    //   - data: string (required)
+    //   - timestamp: timestamp (required)
+    //
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(email) {
+      return isAuthenticated() && request.auth.token.email == email;
+    }
+
+    function isValidDevice(data) {
+      return data.id is string &&
+             data.role in ['dashboard', 'agent'] &&
+             data.status in ['online', 'offline'] &&
+             data.ownerEmail is string;
+    }
+
+    match /devices/{deviceId} {
+      allow read: if isAuthenticated() && isOwner(resource.data.ownerEmail);
+      allow create: if isAuthenticated() && isOwner(request.resource.data.ownerEmail) && isValidDevice(request.resource.data);
+      allow update: if isAuthenticated() && isOwner(resource.data.ownerEmail) && isValidDevice(request.resource.data);
+      allow delete: if isAuthenticated() && isOwner(resource.data.ownerEmail);
+
+      match /signals/{signalId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+  }
+}
