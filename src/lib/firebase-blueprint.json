@@ -1,0 +1,41 @@
+{
+  "entities": {
+    "Device": {
+      "title": "Device",
+      "description": "Represents a device connected to the Airfisa network.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["dashboard", "agent"] },
+        "status": { "type": "string", "enum": ["online", "offline"] },
+        "lastSeen": { "type": "string", "format": "date-time" },
+        "ownerEmail": { "type": "string" }
+      },
+      "required": ["id", "role", "status", "ownerEmail"]
+    },
+    "Signal": {
+      "title": "Signal",
+      "description": "WebRTC signaling data for peer-to-peer connections.",
+      "type": "object",
+      "properties": {
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "type": { "type": "string", "enum": ["offer", "answer", "candidate"] },
+        "data": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["from", "to", "type", "data", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/devices/{deviceId}": {
+      "schema": "Device",
+      "description": "Registered devices and their current status."
+    },
+    "/devices/{deviceId}/signals/{signalId}": {
+      "schema": "Signal",
+      "description": "Signaling messages for establishing WebRTC connections."
+    }
+  }
+}
